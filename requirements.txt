@@ -1,0 +1,5 @@
+psycopg[binary]==3.2.12
+python-dotenv==1.0.1
+Faker==25.8.0
+tqdm==4.66.5
+
