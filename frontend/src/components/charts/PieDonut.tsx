@@ -21,7 +21,7 @@ export default function PieDonut({ data, title }: { data: { name: string; value:
       },
     ],
   } as any;
-  return <ReactECharts option={option} style={{ height: 360 }} />;
+  return <ReactECharts option={option} style={{ height: 360, touchAction: 'pan-y' }} />;
 }
 
 

@@ -1,14 +1,15 @@
-import { Grid, MenuItem, Select, Typography, Stack, Box, Autocomplete, TextField } from '@mui/material'
-import type { SelectChangeEvent } from '@mui/material'
+import { Grid, Typography, Stack, Box, Autocomplete, TextField } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { getBrands, getModelsByBrand } from '../../api/catalog'
-import { getPriceSummary } from '../../api/analytics'
+import { getPriceSummary, getSalesTrend, getTopBrandsRevenue, getTopBrandsUnits } from '../../api/analytics'
 import { defaultRange, toParam } from '../../components/common/DateRangePicker'
 import DateRangePicker from '../../components/common/DateRangePicker'
 import PageHeader from '../../components/layout/PageHeader'
 import SectionCard from '../../components/layout/SectionCard'
-import { KpiCardSkeleton } from '../../components/common/Skeletons'
+import { KpiCardSkeleton, ChartSkeleton } from '../../components/common/Skeletons'
+import LineTrend from '../../components/charts/LineTrend'
+import BarTop from '../../components/charts/BarTop'
 import KpiCard from '../../components/common/KpiCard'
 import { Dayjs } from 'dayjs'
 
@@ -22,8 +23,13 @@ export default function PricePage() {
   const [end, setEnd] = useState<Dayjs>(e0)
   const params = { start: toParam(start), end: toParam(end), brand: brand || undefined, model: model || undefined }
   const priceQ = useQuery({ queryKey: ['price-summary', params], queryFn: () => getPriceSummary(params) })
+  // Price trend (avg price per month across brands)
+  const trendQ = useQuery({ queryKey: ['price-trend', params], queryFn: () => getSalesTrend({ start: params.start, end: params.end }) })
+  // Brand average price top: merge revenue and units
+  const topRevQ = useQuery({ queryKey: ['brand-top-rev', params], queryFn: () => getTopBrandsRevenue({ start: params.start, end: params.end, limit: 10 }) })
+  const topUnitsQ = useQuery({ queryKey: ['brand-top-units-for-price', params], queryFn: () => getTopBrandsUnits({ start: params.start, end: params.end, limit: 10 }) })
 
-  const onBrand = (e: SelectChangeEvent) => { setBrand(e.target.value); setModel('') }
+  // brand/model set via Autocomplete
 
   return (
     <Stack spacing={3}>
@@ -58,6 +64,37 @@ export default function PricePage() {
           <Grid size={{ xs: 12, lg: 3 }}>{priceQ.isLoading ? <KpiCardSkeleton /> : <KpiCard title="中位数" value={priceQ.data?.median?.toFixed(0) ?? '-'} />}</Grid>
           <Grid size={{ xs: 12, lg: 3 }}>{priceQ.isLoading ? <KpiCardSkeleton /> : <KpiCard title="P95" value={priceQ.data?.p95?.toFixed(0) ?? '-'} subtitle={`样本 ${priceQ.data?.samples ?? 0}`} />}</Grid>
         </Grid>
+      </SectionCard>
+      <SectionCard title="平均价格趋势">
+        {trendQ.isLoading ? (
+          <ChartSkeleton />
+        ) : (
+          (() => {
+            const months = Array.from(new Set((trendQ.data ?? []).map((d) => d.month))).sort()
+            const avg = months.map((m) => {
+              const items = (trendQ.data ?? []).filter((d) => d.month === m)
+              const rev = items.reduce((a, c) => a + c.revenue, 0)
+              const units = items.reduce((a, c) => a + c.units, 0)
+              return units ? rev / units : 0
+            })
+            return <LineTrend x={months} series={[{ name: '均价', data: avg }]} />
+          })()
+        )}
+      </SectionCard>
+      <SectionCard title="品牌均价 Top">
+        {topRevQ.isLoading || topUnitsQ.isLoading ? (
+          <ChartSkeleton />
+        ) : (
+          (() => {
+            const uMap = new Map<string, number>((topUnitsQ.data ?? []).map((x) => [x.brandName, x.units]))
+            const items = (topRevQ.data ?? [])
+              .map((r) => ({ name: r.brandName, value: uMap.get(r.brandName) ? r.revenue / (uMap.get(r.brandName) || 1) : 0 }))
+              .filter((i) => i.value > 0)
+              .sort((a, b) => b.value - a.value)
+              .slice(0, 10)
+            return <BarTop items={items} valueFormatter={(v) => `${Math.round(v)} 元`} />
+          })()
+        )}
       </SectionCard>
     </Stack>
   )

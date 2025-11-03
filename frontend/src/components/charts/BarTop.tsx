@@ -39,7 +39,7 @@ export default function BarTop({ items, valueKey = 'value', nameKey = 'name', ti
       },
     }],
   } as any;
-  return <ReactECharts option={option} style={{ height: 360 }} />;
+  return <ReactECharts option={option} style={{ height: 360, touchAction: 'pan-y' }} />;
 }
 
 

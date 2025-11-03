@@ -52,7 +52,7 @@ export default function LineTrend({ x, series }: { x: string[]; series: { name: 
       animationEasing: 'quartOut',
     })),
   } as any;
-  return <ReactECharts option={option} style={{ height: 360 }} />;
+  return <ReactECharts option={option} style={{ height: 360, touchAction: 'pan-y' }} />;
 }
 
 

@@ -23,7 +23,7 @@ export default function StackedBar({ x, series }: { x: string[]; series: { name:
     },
     series: series.map((s) => ({ type: 'bar', name: s.name, stack: 'total', data: s.data, itemStyle: { borderRadius: 4 } })),
   } as any;
-  return <ReactECharts option={option} style={{ height: 360 }} />;
+  return <ReactECharts option={option} style={{ height: 360, touchAction: 'pan-y' }} />;
 }
 
 

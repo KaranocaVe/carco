@@ -48,6 +48,20 @@ export default function DashboardPage() {
   const loadingPrice = priceQ.isLoading
   const loadingTrend = trendQ.isLoading
 
+  // Aggregate totals by month for sparkline KPIs
+  const totalsByMonthUnits = months.map((m) => (trendQ.data ?? [])
+    .filter((d) => d.month === m)
+    .reduce((acc, cur) => acc + (cur.units ?? 0), 0))
+  const totalsByMonthRevenue = months.map((m) => (trendQ.data ?? [])
+    .filter((d) => d.month === m)
+    .reduce((acc, cur) => acc + (cur.revenue ?? 0), 0))
+  const lastUnits = totalsByMonthUnits.length ? totalsByMonthUnits[totalsByMonthUnits.length - 1] : 0
+  const prevUnits = totalsByMonthUnits.length > 1 ? totalsByMonthUnits[totalsByMonthUnits.length - 2] : 0
+  const deltaUnits = prevUnits ? ((lastUnits - prevUnits) / prevUnits) * 100 : 0
+  const lastRevenue = totalsByMonthRevenue.length ? totalsByMonthRevenue[totalsByMonthRevenue.length - 1] : 0
+  const prevRevenue = totalsByMonthRevenue.length > 1 ? totalsByMonthRevenue[totalsByMonthRevenue.length - 2] : 0
+  const deltaRevenue = prevRevenue ? ((lastRevenue - prevRevenue) / prevRevenue) * 100 : 0
+
   return (
     <Stack spacing={3}>
       <PageHeader title="仪表盘" actions={<DateRangePicker start={start} end={end} onChange={(s, e) => { setStart(s); setEnd(e) }} />} />
@@ -77,6 +91,17 @@ export default function DashboardPage() {
         }
       >
         {loadingTrend ? (<ChartSkeleton />) : (!segment ? (<LineTrend x={months} series={series} />) : (<StackedBar x={months} series={genderSeries} />))}
+      </SectionCard>
+
+      <SectionCard title="关键指标">
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <KpiCard title="总销量（当月）" value={lastUnits} subtitle="单位：台" trend={totalsByMonthUnits} delta={deltaUnits} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <KpiCard title="总金额（当月）" value={Math.round(lastRevenue)} subtitle="单位：元" trend={totalsByMonthRevenue} delta={deltaRevenue} />
+          </Grid>
+        </Grid>
       </SectionCard>
 
       <Grid container spacing={2}>
