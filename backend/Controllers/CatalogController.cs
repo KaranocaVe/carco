@@ -18,28 +18,28 @@ namespace carco.Controllers
         }
 
         [HttpGet("brands/{brand}/models")]
-        public async Task<IActionResult> Models(string brand, CancellationToken ct)
+        public async Task<IActionResult> Models(string brand, [FromQuery] string? color, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(brand)) return BadRequest("brand 不能为空");
-            return Ok(await _svc.GetModelsByBrandNameAsync(brand, ct));
+            return Ok(await _svc.GetModelsByBrandNameAsync(brand, color, ct));
         }
 
         [HttpGet("colors")]
-        public async Task<IActionResult> Colors(CancellationToken ct)
+        public async Task<IActionResult> Colors([FromQuery] string? brand, [FromQuery] string? model, CancellationToken ct)
         {
-            return Ok(await _svc.GetColorsAsync(ct));
+            return Ok(await _svc.GetColorsAsync(brand, model, ct));
         }
 
         [HttpGet("suppliers")]
-        public async Task<IActionResult> Suppliers(CancellationToken ct)
+        public async Task<IActionResult> Suppliers([FromQuery] string? brand, [FromQuery] string? model, [FromQuery] string? color, CancellationToken ct)
         {
-            return Ok(await _svc.GetSuppliersAsync(ct));
+            return Ok(await _svc.GetSuppliersAsync(brand, model, color, ct));
         }
 
         [HttpGet("transmissions")]
-        public async Task<IActionResult> Transmissions(CancellationToken ct)
+        public async Task<IActionResult> Transmissions([FromQuery] string? brand, [FromQuery] string? model, [FromQuery] string? color, CancellationToken ct)
         {
-            return Ok(await _svc.GetTransmissionsAsync(ct));
+            return Ok(await _svc.GetTransmissionsAsync(brand, model, color, ct));
         }
     }
 }

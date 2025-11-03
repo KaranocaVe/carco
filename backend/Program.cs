@@ -12,6 +12,9 @@ namespace carco
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+            builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Information);
 
             // Add services to the container.
             builder.Services.AddAuthorization();

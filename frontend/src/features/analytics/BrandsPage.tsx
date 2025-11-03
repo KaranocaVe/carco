@@ -1,8 +1,11 @@
-import { Grid, Typography, ToggleButtonGroup, ToggleButton } from '@mui/material'
+import { Grid, Typography, ToggleButtonGroup, ToggleButton, Stack } from '@mui/material'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { defaultRange, toParam } from '../../components/common/DateRangePicker'
 import DateRangePicker from '../../components/common/DateRangePicker'
+import PageHeader from '../../components/layout/PageHeader'
+import SectionCard from '../../components/layout/SectionCard'
+import { ChartSkeleton } from '../../components/common/Skeletons'
 import { getSalesTrend, getTopBrandsRevenue, getTopBrandsUnits } from '../../api/analytics'
 import LineTrend from '../../components/charts/LineTrend'
 import BarTop from '../../components/charts/BarTop'
@@ -26,41 +29,55 @@ export default function BrandsPage() {
     return metric === 'units' ? (item?.units ?? 0) : (item?.revenue ?? 0)
   }) }))
 
+  const loadingTrend = trendQ.isLoading
+  const loadingTop = topRevenueQ.isLoading || topUnitsQ.isLoading
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Typography variant="h5">品牌分析</Typography>
-        <div className="flex items-center gap-3">
+    <Stack spacing={3}>
+      <PageHeader
+        title="品牌分析"
+        actions={<DateRangePicker start={start} end={end} onChange={(s, e) => { setStart(s); setEnd(e) }} />}
+      />
+      <SectionCard
+        title="品牌销售趋势"
+        actions={
           <ToggleButtonGroup size="small" value={metric} exclusive onChange={(_e, v) => v && setMetric(v)}>
             <ToggleButton value="units">销量</ToggleButton>
             <ToggleButton value="revenue">金额</ToggleButton>
           </ToggleButtonGroup>
-          <DateRangePicker start={start} end={end} onChange={(s, e) => { setStart(s); setEnd(e) }} />
-        </div>
-      </div>
-      <LineTrend x={months} series={series} />
+        }
+      >
+        {loadingTrend ? <ChartSkeleton /> : <LineTrend x={months} series={series} />}
+      </SectionCard>
       <Grid container spacing={2}>
         {metric === 'units' ? (
           <>
             <Grid size={{ xs: 12, lg: 6 }}>
-              <BarTop title="销量Top品牌" items={(topUnitsQ.data ?? []).map((x) => ({ name: x.brandName, value: x.units }))} />
+              <SectionCard title="销量 Top 品牌">
+                {loadingTop ? <ChartSkeleton /> : <BarTop items={(topUnitsQ.data ?? []).map((x) => ({ name: x.brandName, value: x.units }))} valueFormatter={(v) => `${v} 台`} />}
+              </SectionCard>
             </Grid>
             <Grid size={{ xs: 12, lg: 6 }}>
-              <BarTop title="金额Top品牌" items={(topRevenueQ.data ?? []).map((x) => ({ name: x.brandName, value: x.revenue }))} />
+              <SectionCard title="金额 Top 品牌">
+                {loadingTop ? <ChartSkeleton /> : <BarTop items={(topRevenueQ.data ?? []).map((x) => ({ name: x.brandName, value: x.revenue }))} valueFormatter={(v) => `${Math.round(v)} 元`} />}
+              </SectionCard>
             </Grid>
           </>
         ) : (
           <>
             <Grid size={{ xs: 12, lg: 6 }}>
-              <BarTop title="金额Top品牌" items={(topRevenueQ.data ?? []).map((x) => ({ name: x.brandName, value: x.revenue }))} />
+              <SectionCard title="金额 Top 品牌">
+                {loadingTop ? <ChartSkeleton /> : <BarTop items={(topRevenueQ.data ?? []).map((x) => ({ name: x.brandName, value: x.revenue }))} valueFormatter={(v) => `${Math.round(v)} 元`} />}
+              </SectionCard>
             </Grid>
             <Grid size={{ xs: 12, lg: 6 }}>
-              <BarTop title="销量Top品牌" items={(topUnitsQ.data ?? []).map((x) => ({ name: x.brandName, value: x.units }))} />
+              <SectionCard title="销量 Top 品牌">
+                {loadingTop ? <ChartSkeleton /> : <BarTop items={(topUnitsQ.data ?? []).map((x) => ({ name: x.brandName, value: x.units }))} valueFormatter={(v) => `${v} 台`} />}
+              </SectionCard>
             </Grid>
           </>
         )}
       </Grid>
-    </div>
+    </Stack>
   )
 }
 

@@ -53,4 +53,28 @@ namespace carco.Models.Entities
         [Column("spec_code")]
         public string SpecCode { get; set; } = string.Empty;
     }
+
+    [Keyless, Table("vehicle", Schema = "carco")]
+    public class VehicleRow
+    {
+        [Column("vehicle_id")]
+        public long VehicleId { get; set; }
+        [Column("model_id")]
+        public long ModelId { get; set; }
+        [Column("color_id")]
+        public long ColorId { get; set; }
+        [Column("transmission_unit_id")]
+        public long TransmissionUnitId { get; set; }
+    }
+
+    [Keyless, Table("transmission_unit", Schema = "carco")]
+    public class TransmissionUnitRow
+    {
+        [Column("transmission_unit_id")]
+        public long TransmissionUnitId { get; set; }
+        [Column("part_spec_id")]
+        public long PartSpecId { get; set; }
+        [Column("supplier_id")]
+        public long SupplierId { get; set; }
+    }
 }

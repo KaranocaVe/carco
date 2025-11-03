@@ -25,6 +25,8 @@ namespace carco.Data
             modelBuilder.Entity<ColorRow>().HasNoKey().ToTable("color", "carco");
             modelBuilder.Entity<SupplierRow>().HasNoKey().ToTable("supplier", "carco");
             modelBuilder.Entity<PartSpecRow>().HasNoKey().ToTable("part_spec", "carco");
+            modelBuilder.Entity<VehicleRow>().HasNoKey().ToTable("vehicle", "carco");
+            modelBuilder.Entity<TransmissionUnitRow>().HasNoKey().ToTable("transmission_unit", "carco");
 
             // 原生 SQL 投影类型
             modelBuilder.Entity<PriceSummary>().HasNoKey();

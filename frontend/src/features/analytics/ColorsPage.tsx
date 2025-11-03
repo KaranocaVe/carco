@@ -1,8 +1,11 @@
-import { Typography } from '@mui/material'
+import { Typography, Stack } from '@mui/material'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { defaultRange, toParam } from '../../components/common/DateRangePicker'
 import DateRangePicker from '../../components/common/DateRangePicker'
+import PageHeader from '../../components/layout/PageHeader'
+import SectionCard from '../../components/layout/SectionCard'
+import { ChartSkeleton } from '../../components/common/Skeletons'
 import { getTopColors } from '../../api/analytics'
 import PieDonut from '../../components/charts/PieDonut'
 import { Dayjs } from 'dayjs'
@@ -14,13 +17,12 @@ export default function ColorsPage() {
   const params = { start: toParam(start), end: toParam(end) }
   const colorsQ = useQuery({ queryKey: ['colors-analytics', params], queryFn: () => getTopColors({ ...params, limit: 12 }) })
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Typography variant="h5">颜色分析</Typography>
-        <DateRangePicker start={start} end={end} onChange={(s, e) => { setStart(s); setEnd(e) }} />
-      </div>
-      <PieDonut title="颜色占比" data={(colorsQ.data ?? []).map((c) => ({ name: c.colorName, value: c.units }))} />
-    </div>
+    <Stack spacing={3}>
+      <PageHeader title="颜色分析" actions={<DateRangePicker start={start} end={end} onChange={(s, e) => { setStart(s); setEnd(e) }} />} />
+      <SectionCard title="颜色占比">
+        {colorsQ.isLoading ? <ChartSkeleton /> : <PieDonut data={(colorsQ.data ?? []).map((c) => ({ name: c.colorName, value: c.units }))} />}
+      </SectionCard>
+    </Stack>
   )
 }
 

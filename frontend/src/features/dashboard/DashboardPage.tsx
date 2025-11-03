@@ -1,4 +1,4 @@
-import { Grid, Typography, ToggleButtonGroup, ToggleButton, FormControlLabel, Switch } from '@mui/material'
+import { Grid, Typography, ToggleButtonGroup, ToggleButton, FormControlLabel, Switch, Stack } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { Dayjs } from 'dayjs'
 import { defaultRange, toParam } from '../../components/common/DateRangePicker'
@@ -10,6 +10,9 @@ import BarTop from '../../components/charts/BarTop'
 import PieDonut from '../../components/charts/PieDonut'
 import StackedBar from '../../components/charts/StackedBar'
 import { useState } from 'react'
+import PageHeader from '../../components/layout/PageHeader'
+import { ChartSkeleton, KpiCardSkeleton } from '../../components/common/Skeletons'
+import SectionCard from '../../components/layout/SectionCard'
 
 export default function DashboardPage() {
   const { s: s0, e: e0 } = defaultRange()
@@ -40,57 +43,76 @@ export default function DashboardPage() {
     .filter((d) => d.month === m && d.gender === g)
     .reduce((acc, cur) => acc + (metric === 'units' ? cur.units : cur.revenue), 0)) }))
 
+  const loadingTop = metric === 'units' ? topUnitsQ.isLoading || topRevenueQ.isLoading : topRevenueQ.isLoading || topUnitsQ.isLoading
+  const loadingColors = colorsQ.isLoading
+  const loadingPrice = priceQ.isLoading
+  const loadingTrend = trendQ.isLoading
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Typography variant="h5">仪表盘</Typography>
-        <div className="flex items-center gap-3">
-          <ToggleButtonGroup size="small" value={metric} exclusive onChange={(_e, v) => v && setMetric(v)}>
-            <ToggleButton value="units">销量</ToggleButton>
-            <ToggleButton value="revenue">金额</ToggleButton>
-          </ToggleButtonGroup>
-          <FormControlLabel control={<Switch checked={segment} onChange={(e) => setSegment(e.target.checked)} />} label="按性别分段" />
-          <DateRangePicker start={start} end={end} onChange={(s, e) => { setStart(s); setEnd(e) }} />
-        </div>
-      </div>
+    <Stack spacing={3}>
+      <PageHeader title="仪表盘" actions={<DateRangePicker start={start} end={end} onChange={(s, e) => { setStart(s); setEnd(e) }} />} />
 
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, lg: 8 }}>
-          {!segment ? (<LineTrend x={months} series={series} />) : (<StackedBar x={months} series={genderSeries} />)}
+        <Grid size={{ xs: 12, md: 4 }}>
+          {loadingPrice ? <KpiCardSkeleton /> : <KpiCard title="价格均值" value={priceQ.data?.avg?.toFixed(0) ?? '-'} subtitle="单位：元" />}
         </Grid>
-        <Grid size={{ xs: 12, lg: 4 }}>
-          <Grid container spacing={2}>
-            <Grid size={12}><KpiCard title="价格均值" value={priceQ.data?.avg?.toFixed(0) ?? '-'} subtitle="单位：元" /></Grid>
-            <Grid size={12}><KpiCard title="价格中位数" value={priceQ.data?.median?.toFixed(0) ?? '-'} subtitle={`样本 ${priceQ.data?.samples ?? 0}`} /></Grid>
-            <Grid size={12}><KpiCard title="价格P95" value={priceQ.data?.p95?.toFixed(0) ?? '-'} /></Grid>
-          </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          {loadingPrice ? <KpiCardSkeleton /> : <KpiCard title="价格中位数" value={priceQ.data?.median?.toFixed(0) ?? '-'} subtitle={`样本 ${priceQ.data?.samples ?? 0}`} />}
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          {loadingPrice ? <KpiCardSkeleton /> : <KpiCard title="价格P95" value={priceQ.data?.p95?.toFixed(0) ?? '-'} />}
         </Grid>
       </Grid>
+
+      <SectionCard
+        title="销售趋势"
+        actions={
+          <>
+            <ToggleButtonGroup size="small" value={metric} exclusive onChange={(_e, v) => v && setMetric(v)}>
+              <ToggleButton value="units">销量</ToggleButton>
+              <ToggleButton value="revenue">金额</ToggleButton>
+            </ToggleButtonGroup>
+            <FormControlLabel control={<Switch checked={segment} onChange={(e) => setSegment(e.target.checked)} />} label="按性别分段" />
+          </>
+        }
+      >
+        {loadingTrend ? (<ChartSkeleton />) : (!segment ? (<LineTrend x={months} series={series} />) : (<StackedBar x={months} series={genderSeries} />))}
+      </SectionCard>
 
       <Grid container spacing={2}>
         {metric === 'units' ? (
           <>
             <Grid size={{ xs: 12, lg: 6 }}>
-              <BarTop title="销量Top品牌" items={(topUnitsQ.data ?? []).map((x) => ({ name: x.brandName, value: x.units }))} />
+              <SectionCard title="销量 Top 品牌">
+                {loadingTop ? <ChartSkeleton /> : <BarTop items={(topUnitsQ.data ?? []).map((x) => ({ name: x.brandName, value: x.units }))} valueFormatter={(v) => `${v} 台`} />}
+              </SectionCard>
             </Grid>
             <Grid size={{ xs: 12, lg: 6 }}>
-              <BarTop title="金额Top品牌" items={(topRevenueQ.data ?? []).map((x) => ({ name: x.brandName, value: x.revenue }))} />
+              <SectionCard title="金额 Top 品牌">
+                {loadingTop ? <ChartSkeleton /> : <BarTop items={(topRevenueQ.data ?? []).map((x) => ({ name: x.brandName, value: x.revenue }))} valueFormatter={(v) => `${Math.round(v)} 元`} />}
+              </SectionCard>
             </Grid>
           </>
         ) : (
           <>
             <Grid size={{ xs: 12, lg: 6 }}>
-              <BarTop title="金额Top品牌" items={(topRevenueQ.data ?? []).map((x) => ({ name: x.brandName, value: x.revenue }))} />
+              <SectionCard title="金额 Top 品牌">
+                {loadingTop ? <ChartSkeleton /> : <BarTop items={(topRevenueQ.data ?? []).map((x) => ({ name: x.brandName, value: x.revenue }))} valueFormatter={(v) => `${Math.round(v)} 元`} />}
+              </SectionCard>
             </Grid>
             <Grid size={{ xs: 12, lg: 6 }}>
-              <BarTop title="销量Top品牌" items={(topUnitsQ.data ?? []).map((x) => ({ name: x.brandName, value: x.units }))} />
+              <SectionCard title="销量 Top 品牌">
+                {loadingTop ? <ChartSkeleton /> : <BarTop items={(topUnitsQ.data ?? []).map((x) => ({ name: x.brandName, value: x.units }))} valueFormatter={(v) => `${v} 台`} />}
+              </SectionCard>
             </Grid>
           </>
         )}
       </Grid>
 
-      <PieDonut title="颜色占比" data={(colorsQ.data ?? []).map((c) => ({ name: c.colorName, value: c.units }))} />
-    </div>
+      <SectionCard title="颜色占比">
+        {loadingColors ? <ChartSkeleton /> : <PieDonut data={(colorsQ.data ?? []).map((c) => ({ name: c.colorName, value: c.units }))} />}
+      </SectionCard>
+    </Stack>
   )
 }
 
