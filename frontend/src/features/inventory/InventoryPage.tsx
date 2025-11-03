@@ -42,7 +42,7 @@ export default function InventoryPage() {
                 paginationMode="server"
                 paginationModel={{ page, pageSize }}
                 onPaginationModelChange={(m) => { setPage(m.page); setPageSize(m.pageSize) }}
-                rowCount={(unsoldQ.data ?? []).length + pageSize}
+                rowCount={(page * pageSize) + (unsoldQ.data?.length ?? 0) + ((unsoldQ.data?.length ?? 0) === pageSize ? pageSize : 0)}
                 loading={unsoldQ.isLoading}
               />
             </div>

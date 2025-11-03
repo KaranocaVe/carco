@@ -58,7 +58,7 @@ export default function PricePage() {
           </Box>
         }
       >
-        <Grid container spacing={2}>
+        <Grid container spacing={2} alignItems="stretch">
           <Grid size={{ xs: 12, lg: 3 }}>{priceQ.isLoading ? <KpiCardSkeleton /> : <KpiCard title="最小值" value={priceQ.data?.min?.toFixed(0) ?? '-'} />}</Grid>
           <Grid size={{ xs: 12, lg: 3 }}>{priceQ.isLoading ? <KpiCardSkeleton /> : <KpiCard title="均值" value={priceQ.data?.avg?.toFixed(0) ?? '-'} />}</Grid>
           <Grid size={{ xs: 12, lg: 3 }}>{priceQ.isLoading ? <KpiCardSkeleton /> : <KpiCard title="中位数" value={priceQ.data?.median?.toFixed(0) ?? '-'} />}</Grid>

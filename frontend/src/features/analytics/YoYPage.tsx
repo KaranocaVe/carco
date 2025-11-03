@@ -45,14 +45,14 @@ export default function YoYPage() {
       />
       <SectionCard title="指标概览">
         {q.isLoading ? (
-          <Grid container spacing={2}>
+          <Grid container spacing={2} alignItems="stretch">
             <Grid size={{ xs: 12, lg: 3 }}><KpiCardSkeleton /></Grid>
             <Grid size={{ xs: 12, lg: 3 }}><KpiCardSkeleton /></Grid>
             <Grid size={{ xs: 12, lg: 3 }}><KpiCardSkeleton /></Grid>
             <Grid size={{ xs: 12, lg: 3 }}><KpiCardSkeleton /></Grid>
           </Grid>
         ) : (d && (
-          <Grid container spacing={2}>
+          <Grid container spacing={2} alignItems="stretch">
             <Grid size={{ xs: 12, lg: 3 }}><KpiCard title="当月销量" value={d.units} subtitle={`环比 ${pmUnits.toFixed(1)}% ・ 同比 ${pyUnits.toFixed(1)}%`} /></Grid>
             <Grid size={{ xs: 12, lg: 3 }}><KpiCard title="当月金额" value={Math.round(d.revenue)} subtitle={`环比 ${pmRev.toFixed(1)}% ・ 同比 ${pyRev.toFixed(1)}%`} /></Grid>
             <Grid size={{ xs: 12, lg: 3 }}><KpiCard title="当月均价" value={Math.round(avgPrice)} subtitle={`环比 ${pmAvg.toFixed(1)}% ・ 同比 ${pyAvg.toFixed(1)}%`} /></Grid>

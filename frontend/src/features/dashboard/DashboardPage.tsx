@@ -66,7 +66,7 @@ export default function DashboardPage() {
     <Stack spacing={3}>
       <PageHeader title="仪表盘" actions={<DateRangePicker start={start} end={end} onChange={(s, e) => { setStart(s); setEnd(e) }} />} />
 
-      <Grid container spacing={2}>
+      <Grid container spacing={2} alignItems="stretch">
         <Grid size={{ xs: 12, md: 4 }}>
           {loadingPrice ? <KpiCardSkeleton /> : <KpiCard title="价格均值" value={priceQ.data?.avg?.toFixed(0) ?? '-'} subtitle="单位：元" />}
         </Grid>
@@ -94,7 +94,7 @@ export default function DashboardPage() {
       </SectionCard>
 
       <SectionCard title="关键指标">
-        <Grid container spacing={2}>
+        <Grid container spacing={2} alignItems="stretch">
           <Grid size={{ xs: 12, md: 6 }}>
             <KpiCard title="总销量（当月）" value={lastUnits} subtitle="单位：台" trend={totalsByMonthUnits} delta={deltaUnits} />
           </Grid>

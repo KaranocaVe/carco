@@ -3,8 +3,8 @@ import Sparkline from '../charts/Sparkline';
 
 export default function KpiCard({ title, value, subtitle, trend, delta, color }: { title: string; value: string | number; subtitle?: string; trend?: number[]; delta?: number; color?: string }) {
   return (
-    <Card>
-      <CardContent sx={{ position: 'relative', minHeight: 84 }}>
+    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ position: 'relative', minHeight: 84, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Typography variant="overline" color="text.secondary">{title}</Typography>
         <Typography variant="h5" sx={{ mt: 0.5 }}>{value}</Typography>
         {subtitle && <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{subtitle}</Typography>}

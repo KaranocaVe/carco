@@ -13,7 +13,7 @@ export default function SectionCard({ title, actions, children }: { title?: stri
   const open = Boolean(anchorEl);
 
   return (
-    <Card>
+    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {(title || actions) && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 2, pb: 1, flexWrap: 'wrap' }}>
           {title && <Typography variant="h6">{title}</Typography>}
@@ -43,7 +43,7 @@ export default function SectionCard({ title, actions, children }: { title?: stri
           )}
         </Box>
       )}
-      <CardContent>
+      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         {children}
       </CardContent>
     </Card>
