@@ -7,8 +7,7 @@
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5175",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "DATABASE_URL": "postgresql://gaussdb:Secretpassword%40123@127.0.0.1:5432/postgres"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "https": {

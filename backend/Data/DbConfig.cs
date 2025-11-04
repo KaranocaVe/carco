@@ -8,13 +8,7 @@ namespace carco.Data
     {
         public static string GetNpgsqlConnectionString(IConfiguration configuration)
         {
-            string? url = Environment.GetEnvironmentVariable("DATABASE_URL");
-            if (!string.IsNullOrWhiteSpace(url))
-            {
-                string cs = ConvertDatabaseUrlToNpgsql(url);
-                return AppendSearchPath(cs);
-            }
-
+            // Priority 1: PG* environment variables (most explicit, Docker-friendly)
             string? host = Environment.GetEnvironmentVariable("PGHOST");
             string port = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
             string? database = Environment.GetEnvironmentVariable("PGDATABASE");
@@ -29,13 +23,22 @@ namespace carco.Data
                 return AppendSearchPath(cs);
             }
 
+            // Priority 2: DATABASE_URL (Heroku-style)
+            string? url = Environment.GetEnvironmentVariable("DATABASE_URL");
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                string cs = ConvertDatabaseUrlToNpgsql(url);
+                return AppendSearchPath(cs);
+            }
+
+            // Priority 3: appsettings.json ConnectionStrings
             string? fromConfig = configuration.GetConnectionString("Carco");
             if (!string.IsNullOrWhiteSpace(fromConfig))
             {
                 return AppendSearchPath(fromConfig);
             }
 
-            throw new InvalidOperationException("Connection string not found. Provide DATABASE_URL or PG* envs or ConnectionStrings:Carco.");
+            throw new InvalidOperationException("Connection string not found. Provide PGHOST/PGUSER/PGPASSWORD/PGDATABASE or DATABASE_URL or ConnectionStrings:Carco.");
         }
 
         private static string ConvertDatabaseUrlToNpgsql(string databaseUrl)

@@ -1,6 +1,7 @@
 using carco.Data;
 using carco.Services;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace carco
 {
@@ -22,13 +23,31 @@ namespace carco
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
-                    policy.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod());
+                {
+                    if (builder.Environment.IsDevelopment())
+                    {
+                        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                    }
+                    else
+                    {
+                        policy.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    }
+                });
             });
 
             // DbContext
             string connString = DbConfig.GetNpgsqlConnectionString(builder.Configuration);
+            try
+            {
+                var csb = new NpgsqlConnectionStringBuilder(connString);
+                Console.WriteLine($"[DB] Host={csb.Host};Port={csb.Port};Database={csb.Database}");
+            }
+            catch
+            {
+                Console.WriteLine("[DB] Unable to parse connection string.");
+            }
             builder.Services.AddDbContext<CarcoContext>(options => options.UseNpgsql(connString));
 
             // Application services

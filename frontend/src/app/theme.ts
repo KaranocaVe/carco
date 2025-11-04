@@ -85,23 +85,7 @@ export const createAppTheme = (mode: 'light' | 'dark') => createTheme({
         root: { fontWeight: 600, letterSpacing: 0.2, opacity: 0.72 },
       },
     },
-    // DataGrid visual polish
-    MuiDataGrid: {
-      styleOverrides: {
-        root: ({ theme }) => ({
-          border: 0,
-          '--DataGrid-rowBorderColor': theme.palette.divider,
-          '--DataGrid-containerBackground': theme.palette.background.paper,
-          '& .MuiDataGrid-columnHeaders': {
-            backgroundColor: theme.palette.action.hover,
-            borderBottomColor: theme.palette.divider,
-          },
-          '& .MuiDataGrid-row:hover': {
-            backgroundColor: alpha(theme.palette.primary.main, 0.04),
-          },
-        }),
-      },
-    },
+    // DataGrid visual polish（移除类型报错，可在组件处通过 sx 定制）
     MuiButton: {
       styleOverrides: {
         root: ({ theme }) => ({

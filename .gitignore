@@ -54,4 +54,6 @@ TestResults/
 *.user
 *.suo
 
+report/
+
 

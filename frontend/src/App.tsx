@@ -1,12 +1,11 @@
 import { Suspense, useMemo, useState } from 'react';
 import { ThemeProvider, CssBaseline, AppBar, Toolbar, Typography, Box, useMediaQuery, Container, IconButton, LinearProgress } from '@mui/material';
-import { Link, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { createAppTheme } from './app/theme';
 import { routes } from './app/routes';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import SideNav, { DRAWER_WIDTH } from './components/layout/SideNav';
 
-const drawerWidth = 220;
 
 export default function App() {
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
@@ -16,7 +15,7 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AppBar position="fixed" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
+      <AppBar position="fixed" color="default" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
         <Toolbar>
           <IconButton color="inherit" edge="start" onClick={toggleMobile} sx={{ mr: 2, display: { lg: 'none' } }}>
             <MenuRoundedIcon />

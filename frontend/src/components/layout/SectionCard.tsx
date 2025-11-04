@@ -1,5 +1,6 @@
 import { Card, CardContent, Box, Typography, IconButton, Popover } from '@mui/material'
 import type { ReactNode, MouseEvent } from 'react'
+import { useState } from 'react'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
@@ -7,7 +8,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 export default function SectionCard({ title, actions, children }: { title?: string; actions?: ReactNode; children: ReactNode }) {
   const theme = useTheme();
   const isSm = useMediaQuery(theme.breakpoints.down('sm'));
-  const [anchorEl, setAnchorEl] = (globalThis as any).React?.useState ? (globalThis as any).React.useState<HTMLElement | null>(null) : [null, (_v: HTMLElement | null) => {}];
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const openMenu = (e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
   const closeMenu = () => setAnchorEl(null);
   const open = Boolean(anchorEl);

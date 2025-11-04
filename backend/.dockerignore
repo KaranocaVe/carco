@@ -1,0 +1,13 @@
+bin
+obj
+.git
+.gitignore
+Dockerfile
+appsettings.*.json
+Properties/launchSettings.json
+**/*.user
+**/*.suo
+**/*.swp
+**/*.log
+
+

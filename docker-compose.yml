@@ -1,0 +1,92 @@
+services:
+  opengauss:
+    image: enmotech/opengauss-lite:latest
+    privileged: true
+    environment:
+      - GS_PASSWORD=Secretpassword@123
+    ports:
+      - "15432:5432"
+    volumes:
+      - opengauss-data:/var/lib/opengauss
+    restart: unless-stopped
+
+  db-init:
+    image: postgres:16-alpine
+    container_name: db-init
+    depends_on:
+      - opengauss
+    environment:
+      - PGPASSWORD=Secretpassword@123
+    volumes:
+      - ./:/work:ro
+    entrypoint: sh -c "until pg_isready -h opengauss -p 5432 -U gaussdb; do echo 'waiting for opengauss...'; sleep 2; done; psql -h opengauss -U gaussdb -d postgres -v ON_ERROR_STOP=1 -f /work/sql/init.sql && echo 'DDL init done'"
+    restart: "no"
+
+  data-init:
+    image: python:3.12-slim
+    container_name: data-init
+    working_dir: /work
+    environment:
+      - DATABASE_URL=postgresql://gaussdb:Secretpassword%40123@opengauss:5432/postgres
+      - NUM_VEHICLES=1000
+      - NUM_CUSTOMERS=500
+    volumes:
+      - ./:/work
+    depends_on:
+      - db-init
+    command: sh -c "apt-get update -qq && apt-get install -y -qq postgresql-client > /dev/null && until pg_isready -h opengauss -p 5432 -U gaussdb; do echo 'Waiting for database...'; sleep 2; done && pip install --no-cache-dir -r requirements.txt && python data_init/main.py --yes"
+    restart: "no"
+
+  backend:
+    build:
+      context: ./backend
+    container_name: carco-backend
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:5175
+      - ASPNETCORE_ENVIRONMENT=Development
+      - PGHOST=opengauss
+      - PGPORT=5432
+      - PGDATABASE=postgres
+      - PGUSER=gaussdb
+      - PGPASSWORD=Secretpassword@123
+    depends_on:
+      - opengauss
+      - db-init
+      - data-init
+    ports:
+      - "5175:5175"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_BASE_URL=http://localhost:5175
+    container_name: carco-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+
+  seed:
+    image: python:3.12-slim
+    container_name: data-seed
+    profiles: ["seed"]
+    working_dir: /work
+    environment:
+      - DATABASE_URL=postgresql://gaussdb:Secretpassword%40123@opengauss:5432/postgres
+      - NUM_VEHICLES=1000
+      - NUM_CUSTOMERS=500
+    volumes:
+      - ./:/work
+    depends_on:
+      - db-init
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && python data_init/main.py --reset --yes"
+    restart: "no"
+
+volumes:
+  opengauss-data:
+    driver: local
+
+
