@@ -19,7 +19,7 @@ namespace carco.Services
             if (pageSize <= 0 || pageSize > 200) pageSize = 50;
             int offset = (page - 1) * pageSize;
             string asOfDate = asOf.ToString("yyyy-MM-dd");
-            var args = new List<object>();
+            List<object> args = new();
             int pi = 0;
             string sql = @"select v.vin as ""Vin"", ia.dealer_id as ""DealerId"", d.name as ""DealerName"",
                           ia.received_at as ""ReceivedAt"",
@@ -29,11 +29,13 @@ namespace carco.Services
                    join carco.dealer d on d.dealer_id = ia.dealer_id
                    left join carco.sale s on s.vehicle_id = ia.vehicle_id
                    where s.vehicle_id is null";
-            args.Add(asOfDate); pi++;
+            args.Add(asOfDate);
+            pi++;
             if (dealerId.HasValue)
             {
                 sql += $" and ia.dealer_id = {{{pi}}}";
-                args.Add(dealerId.Value); pi++;
+                args.Add(dealerId.Value);
+                pi++;
             }
             sql += $" order by 5 desc limit {{{pi}}} offset {{{pi + 1}}}";
             args.Add(pageSize);
@@ -51,12 +53,14 @@ namespace carco.Services
                         from carco.inventory_assignment ia
                         left join carco.sale s on s.vehicle_id = ia.vehicle_id
                         where s.vehicle_id is null";
-            var args2 = new List<object>();
-            args2.Add(asOfDate2); pj++;
+            List<object> args2 = new();
+            args2.Add(asOfDate2);
+            pj++;
             if (dealerId.HasValue)
             {
                 sql2 += $" and ia.dealer_id = {{{pj}}}";
-                args2.Add(dealerId.Value); pj++;
+                args2.Add(dealerId.Value);
+                pj++;
             }
             sql2 += @")
                     select 

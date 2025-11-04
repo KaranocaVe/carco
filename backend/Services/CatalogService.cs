@@ -31,16 +31,24 @@ namespace carco.Services
             IQueryable<CatalogModel> q = from m in _db.Set<ModelRow>().AsNoTracking()
                 join b in _db.Set<BrandRow>().AsNoTracking() on m.BrandId equals b.BrandId
                 where b.Name == brandName
-                select new CatalogModel { Id = m.ModelId, Name = m.Name };
+                select new CatalogModel
+                {
+                    Id = m.ModelId,
+                    Name = m.Name
+                };
 
             if (!string.IsNullOrWhiteSpace(colorName))
             {
                 // 按颜色存在性过滤（该品牌下有该颜色的车辆）
-                var filtered = from x in q
+                IQueryable<CatalogModel> filtered = from x in q
                     join v in _db.Set<VehicleRow>().AsNoTracking() on x.Id equals v.ModelId
                     join c in _db.Set<ColorRow>().AsNoTracking() on v.ColorId equals c.ColorId
                     where c.Name == colorName
-                    select new CatalogModel { Id = x.Id, Name = x.Name };
+                    select new CatalogModel
+                    {
+                        Id = x.Id,
+                        Name = x.Name
+                    };
                 q = filtered.Distinct().OrderBy(m => m.Name);
             }
             else
@@ -56,7 +64,11 @@ namespace carco.Services
             {
                 return await _db.Set<ColorRow>().AsNoTracking()
                     .OrderBy(c => c.Name)
-                    .Select(c => new CatalogColor { Id = c.ColorId, Name = c.Name })
+                    .Select(c => new CatalogColor
+                    {
+                        Id = c.ColorId,
+                        Name = c.Name
+                    })
                     .ToListAsync(ct);
             }
 
@@ -65,8 +77,12 @@ namespace carco.Services
                 join m in _db.Set<ModelRow>().AsNoTracking() on v.ModelId equals m.ModelId
                 join b in _db.Set<BrandRow>().AsNoTracking() on m.BrandId equals b.BrandId
                 where (string.IsNullOrWhiteSpace(brandName) || b.Name == brandName)
-                   && (string.IsNullOrWhiteSpace(modelName) || m.Name == modelName)
-                select new CatalogColor { Id = c.ColorId, Name = c.Name };
+                      && (string.IsNullOrWhiteSpace(modelName) || m.Name == modelName)
+                select new CatalogColor
+                {
+                    Id = c.ColorId,
+                    Name = c.Name
+                };
             return await q.Distinct().OrderBy(x => x.Name).ToListAsync(ct);
         }
 
@@ -76,7 +92,11 @@ namespace carco.Services
             {
                 return await _db.Set<SupplierRow>().AsNoTracking()
                     .OrderBy(s => s.Name)
-                    .Select(s => new CatalogSupplier { Id = s.SupplierId, Name = s.Name })
+                    .Select(s => new CatalogSupplier
+                    {
+                        Id = s.SupplierId,
+                        Name = s.Name
+                    })
                     .ToListAsync(ct);
             }
 
@@ -87,9 +107,13 @@ namespace carco.Services
                 join b in _db.Set<BrandRow>().AsNoTracking() on m.BrandId equals b.BrandId
                 join c in _db.Set<ColorRow>().AsNoTracking() on v.ColorId equals c.ColorId
                 where (string.IsNullOrWhiteSpace(brandName) || b.Name == brandName)
-                   && (string.IsNullOrWhiteSpace(modelName) || m.Name == modelName)
-                   && (string.IsNullOrWhiteSpace(colorName) || c.Name == colorName)
-                select new CatalogSupplier { Id = s.SupplierId, Name = s.Name };
+                      && (string.IsNullOrWhiteSpace(modelName) || m.Name == modelName)
+                      && (string.IsNullOrWhiteSpace(colorName) || c.Name == colorName)
+                select new CatalogSupplier
+                {
+                    Id = s.SupplierId,
+                    Name = s.Name
+                };
             return await q.Distinct().OrderBy(x => x.Name).ToListAsync(ct);
         }
 
@@ -97,17 +121,27 @@ namespace carco.Services
         {
             // 仅返回实际安装在车辆上的变速器（可选品牌/车型/颜色过滤）
             var q = from ps in _db.Set<PartSpecRow>().AsNoTracking()
-                    join tu in _db.Set<TransmissionUnitRow>().AsNoTracking() on ps.PartSpecId equals tu.PartSpecId
-                    join v in _db.Set<VehicleRow>().AsNoTracking() on tu.TransmissionUnitId equals v.TransmissionUnitId
-                    join m in _db.Set<ModelRow>().AsNoTracking() on v.ModelId equals m.ModelId
-                    join b in _db.Set<BrandRow>().AsNoTracking() on m.BrandId equals b.BrandId
-                    join c in _db.Set<ColorRow>().AsNoTracking() on v.ColorId equals c.ColorId
-                    where (string.IsNullOrWhiteSpace(brandName) || b.Name == brandName)
-                       && (string.IsNullOrWhiteSpace(modelName) || m.Name == modelName)
-                       && (string.IsNullOrWhiteSpace(colorName) || c.Name == colorName)
-                    select new { ps.PartSpecId, ps.Name, ps.SpecCode };
+                join tu in _db.Set<TransmissionUnitRow>().AsNoTracking() on ps.PartSpecId equals tu.PartSpecId
+                join v in _db.Set<VehicleRow>().AsNoTracking() on tu.TransmissionUnitId equals v.TransmissionUnitId
+                join m in _db.Set<ModelRow>().AsNoTracking() on v.ModelId equals m.ModelId
+                join b in _db.Set<BrandRow>().AsNoTracking() on m.BrandId equals b.BrandId
+                join c in _db.Set<ColorRow>().AsNoTracking() on v.ColorId equals c.ColorId
+                where (string.IsNullOrWhiteSpace(brandName) || b.Name == brandName)
+                      && (string.IsNullOrWhiteSpace(modelName) || m.Name == modelName)
+                      && (string.IsNullOrWhiteSpace(colorName) || c.Name == colorName)
+                select new
+                {
+                    ps.PartSpecId,
+                    ps.Name,
+                    ps.SpecCode
+                };
             var list = await q.Distinct().OrderBy(x => x.Name).ToListAsync(ct);
-            return list.Select(x => new CatalogTransmission { Id = x.PartSpecId, Name = x.Name, SpecCode = x.SpecCode }).ToList();
+            return list.Select(x => new CatalogTransmission
+            {
+                Id = x.PartSpecId,
+                Name = x.Name,
+                SpecCode = x.SpecCode
+            }).ToList();
         }
     }
 }

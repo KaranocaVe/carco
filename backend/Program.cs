@@ -31,8 +31,8 @@ namespace carco
                     else
                     {
                         policy.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
-                              .AllowAnyHeader()
-                              .AllowAnyMethod();
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
                     }
                 });
             });
@@ -41,7 +41,7 @@ namespace carco
             string connString = DbConfig.GetNpgsqlConnectionString(builder.Configuration);
             try
             {
-                var csb = new NpgsqlConnectionStringBuilder(connString);
+                NpgsqlConnectionStringBuilder csb = new(connString);
                 Console.WriteLine($"[DB] Host={csb.Host};Port={csb.Port};Database={csb.Database}");
             }
             catch
